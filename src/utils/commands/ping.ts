@@ -8,4 +8,4 @@ export default {
 	async execute(i) {
 		await i.reply(`Pong!`);
 	},
-} satisfies Command;
+} satisfies Command["default"];

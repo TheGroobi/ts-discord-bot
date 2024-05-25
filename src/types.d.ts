@@ -1,6 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
 interface Command {
-	data: SlashCommandBuilder;
-	execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+	default: {
+		data: SlashCommandBuilder;
+		execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+	};
 }
