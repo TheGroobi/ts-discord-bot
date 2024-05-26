@@ -1,6 +1,15 @@
 import { config } from "dotenv";
-import { Client, GatewayIntentBits, Events, Interaction } from "discord.js";
+import {
+	Client,
+	GatewayIntentBits,
+	Events,
+	Interaction,
+	Message,
+} from "discord.js";
 import ready from "./utils/ready";
+import { link } from "fs";
+import { isValidURL } from "./utils/helper";
+import { handleCommand } from "./utils/handle-command";
 
 config();
 
@@ -42,20 +51,17 @@ client.on(Events.InteractionCreate, async (i: Interaction) => {
 			});
 		} else {
 			await i.reply({
-				content: `there was an error while executing this command!`,
+				content: `There was an error while executing this command!`,
 				ephemeral: true,
 			});
 		}
 	}
 });
 
-// client.on(Events.MessageCreate, (message: Message) => {
-// 	// Log every message received
-// 	console.log(`Message received: ${message.content}`);
+client.on(Events.MessageCreate, (message: Message) => {
+	if (!message.content.startsWith("$") || message.content.length < 3) {
+		return;
+	}
 
-// 	// Check if the message is "!ping"
-// 	if (message.content === "!ping") {
-// 		// Respond with "Pong!"
-// 		message.channel.send("Pong!");
-// 	}
-// });
+	handleCommand(message);
+});
