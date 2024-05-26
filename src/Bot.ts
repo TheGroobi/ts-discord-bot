@@ -18,7 +18,7 @@ const client = new Client({
 
 //second argument set to true for deploying the commands to discord
 // REMOVE AFTER DEV
-ready(client, true);
+ready(client);
 
 client.login(token);
 
