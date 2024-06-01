@@ -7,9 +7,7 @@ import {
 	Message,
 } from "discord.js";
 import ready from "./utils/ready";
-import { link } from "fs";
-import { isValidURL } from "./utils/helper";
-import { handleCommand } from "./utils/handle-command";
+import { handleMessageCommand } from "./utils/commands";
 
 config();
 
@@ -27,12 +25,14 @@ const client = new Client({
 
 //second argument set to true for deploying the commands to discord
 // REMOVE AFTER DEV
-ready(client);
+ready(client, true);
 
 client.login(token);
 
 client.on(Events.InteractionCreate, async (i: Interaction) => {
-	if (!i.isChatInputCommand()) return;
+	if (!i.isChatInputCommand()) {
+		return;
+	}
 
 	const command = i.client.commands.get(i.commandName);
 	if (!command) {
@@ -63,5 +63,5 @@ client.on(Events.MessageCreate, (message: Message) => {
 		return;
 	}
 
-	handleCommand(message);
+	handleMessageCommand(message);
 });
