@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Command } from "../types";
 import { CommandInteraction } from "discord.js";
 import { playCommand } from "../utils/commands";
+import { Command } from "src/types";
 
-const play: Command["default"] = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName("play")
 		.setDescription(
@@ -23,6 +23,4 @@ const play: Command["default"] = {
 		}
 		playCommand(url, i);
 	},
-};
-
-export default play;
+} satisfies Command["default"];
