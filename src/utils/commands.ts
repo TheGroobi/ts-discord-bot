@@ -1,11 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { CommandInteraction, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from 'discord.js';
+import {
+	CommandInteraction,
+	REST,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	Routes,
+} from 'discord.js';
 import { Client, Collection } from 'discord.js';
 import { Command } from 'src/types';
 import { config } from 'dotenv';
 import { Message } from 'discord.js';
 import { isValidURL, loadModule } from './helper';
+import { downloadSong } from './play';
 
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -28,7 +34,9 @@ export const readySlashCommands = (c: Client): boolean | void => {
 			c.commands.set(command.data.name, command);
 			commands.push(command.data.toJSON());
 		} else {
-			console.log(`[WARNING] The command at ${f} is missing a required "data" or "execute" property`);
+			console.log(
+				`[WARNING] The command at ${f} is missing a required "data" or "execute" property`
+			);
 			failed++;
 		}
 	}
@@ -49,7 +57,9 @@ export const deploySlashCommands = async (): Promise<void> => {
 			body: commands,
 		});
 
-		console.log(`Successfully reloaded ${(data as unknown[]).length} application application (/) commmands`);
+		console.log(
+			`Successfully reloaded ${(data as unknown[]).length} application application (/) commmands`
+		);
 	} catch (e: unknown) {
 		console.error(e);
 	}
@@ -70,14 +80,19 @@ export function handleMessageCommand(message: Message) {
 }
 
 export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
+	//if url is not valid reply with a not valid error
 	if (!isValidURL(url)) {
 		if (i instanceof Message) {
-			i.channel.send('The URL provided is not a valid song link, please try with a valid URL.');
+			i.channel.send(
+				'The URL provided is not a valid song link, please try with a valid URL.'
+			);
 			return;
 		} else {
-			await i.reply('The URL provided is not a valid song link, please try with a valid URL.');
+			await i.reply(
+				'The URL provided is not a valid song link, please try with a valid URL.'
+			);
 		}
 	}
 
-	console.log('Procceeding the play command...');
+	downloadSong(url);
 }

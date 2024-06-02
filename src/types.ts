@@ -1,4 +1,8 @@
-import type { CommandInteraction, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder } from 'discord.js';
+import type {
+	CommandInteraction,
+	SlashCommandBuilder,
+	SlashCommandOptionsOnlyBuilder,
+} from 'discord.js';
 
 export interface Command {
 	default: {

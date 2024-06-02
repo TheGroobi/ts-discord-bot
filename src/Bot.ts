@@ -10,7 +10,11 @@ const token = process.env.DISCORD_BOT_TOKEN;
 console.log('Bot is starting...');
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+	],
 });
 
 ready(client, true);

@@ -1,15 +1,16 @@
 {
-	"dependencies": {
-		"discord.js": "^14.15.2",
-		"dotenv": "^16.4.5"
-	},
-	"devDependencies": {
-		"@types/node": "^20.12.12",
-		"prettier": "3.3.0",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.4.5"
-	},
-	"scripts": {
-		"start": "ts-node src/Bot.ts"
-	}
+  "dependencies": {
+    "discord.js": "^14.15.2",
+    "dotenv": "^16.4.5",
+    "yt-dlp-wrap": "^2.3.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "prettier": "3.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "start": "ts-node src/Bot.ts"
+  }
 }
