@@ -1,12 +1,14 @@
 {
   "dependencies": {
+    "@discordjs/voice": "^0.17.0",
     "discord.js": "^14.15.2",
     "dotenv": "^16.4.5",
+    "libsodium-wrappers": "^0.7.13",
     "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
-    "prettier": "3.3.0",
+    "prettier": "^3.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },

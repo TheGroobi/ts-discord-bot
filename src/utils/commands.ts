@@ -11,7 +11,7 @@ import { Command } from 'src/types';
 import { config } from 'dotenv';
 import { Message } from 'discord.js';
 import { isValidURL, loadModule } from './helper';
-import { downloadSong } from './play';
+import { playSong } from './play';
 
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -45,7 +45,6 @@ export const readySlashCommands = (c: Client): boolean | void => {
 };
 
 export const deploySlashCommands = async (): Promise<void> => {
-	console.log(commands);
 	if (!token || !clientId || !publicKey) {
 		throw new Error('one of the env variables is not defined');
 	}
@@ -80,19 +79,17 @@ export function handleMessageCommand(message: Message) {
 }
 
 export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
-	//if url is not valid reply with a not valid error
+	let member = i instanceof Message ? i.member : i.guild?.members.cache.get(i.user.id);
+
 	if (!isValidURL(url)) {
-		if (i instanceof Message) {
-			i.channel.send(
-				'The URL provided is not a valid song link, please try with a valid URL.'
-			);
-			return;
-		} else {
-			await i.reply(
-				'The URL provided is not a valid song link, please try with a valid URL.'
-			);
-		}
+		await i.reply('The URL provided is not a valid song link, please try with a valid URL.');
+		return;
 	}
 
-	downloadSong(url);
+	if (!member?.voice.channel) {
+		await i.reply('You must be connected to a voice channel to play a song.');
+		return;
+	}
+
+	playSong(url, member.voice.channel);
 }
