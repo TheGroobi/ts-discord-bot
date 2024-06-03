@@ -1,5 +1,5 @@
 import { Client, Events } from 'discord.js';
-import { readySlashCommands, deploySlashCommands } from './commands';
+import { readySlashCommands, deploySlashCommands } from './slash-commands';
 
 export default (c: Client, deploy: boolean = false): void => {
 	try {

@@ -1,7 +1,8 @@
 import { config } from 'dotenv';
 import { Client, GatewayIntentBits, Events, Interaction, Message } from 'discord.js';
 import ready from './utils/ready';
-import { handleMessageCommand } from './utils/commands';
+import { handleMessageCommand } from './utils/handlers/message-handler';
+import { handleSlashCommand } from './utils/handlers/handle-slash-command';
 
 config();
 
@@ -14,7 +15,7 @@ const client = new Client({
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildVoiceStates
+		GatewayIntentBits.GuildVoiceStates,
 	],
 });
 
@@ -22,36 +23,18 @@ ready(client, true);
 
 client.login(token);
 
-client.on(Events.InteractionCreate, async (i: Interaction) => {
-	if (!i.isChatInputCommand()) {
+client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+	if (!interaction.isChatInputCommand()) {
 		return;
 	}
-	const command = i.client.commands.get(i.commandName);
-	if (!command) {
-		console.error(`No command matching ${i.commandName} was found.`);
-		return;
-	}
-	try {
-		await command.execute(i);
-	} catch (e: unknown) {
-		console.error(e);
-		if (i.replied || i.deferred) {
-			await i.followUp({
-				content: `There was an error while executing ${i.commandName}`,
-				ephemeral: true,
-			});
-		} else {
-			await i.reply({
-				content: `There was an error while executing this command!`,
-				ephemeral: true,
-			});
-		}
-	}
+
+	handleSlashCommand(interaction);
 });
 
 client.on(Events.MessageCreate, (message: Message) => {
 	if (!message.content.startsWith('$') || message.content.length < 3) {
 		return;
 	}
+
 	handleMessageCommand(message);
 });

@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-	CommandInteraction,
 	REST,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	Routes,
@@ -9,9 +8,7 @@ import {
 import { Client, Collection } from 'discord.js';
 import { Command } from 'src/types';
 import { config } from 'dotenv';
-import { Message } from 'discord.js';
-import { isValidURL, loadModule } from './helper';
-import { playSong } from './play';
+import { loadModule } from './helper';
 
 config();
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -21,7 +18,7 @@ let commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 
 export const readySlashCommands = (c: Client): boolean | void => {
 	c.commands = new Collection();
-	const foldersPath = path.join(__dirname, '../commands');
+	const foldersPath = path.join(__dirname, '../commands/slash-commands');
 	const commandFiles = fs.readdirSync(foldersPath);
 	let failed = 0;
 
@@ -63,33 +60,3 @@ export const deploySlashCommands = async (): Promise<void> => {
 		console.error(e);
 	}
 };
-
-export function handleMessageCommand(message: Message) {
-	const fullCommand = message.content.split('$').slice(1).join().split(' ');
-	const command = fullCommand[0];
-	const args = fullCommand.slice(1);
-
-	if (command === 'ping') {
-		message.channel.send('Pong!');
-	}
-
-	if (command === 'play' && args[0]) {
-		playCommand(args[0], message);
-	}
-}
-
-export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
-	let member = i instanceof Message ? i.member : i.guild?.members.cache.get(i.user.id);
-
-	if (!isValidURL(url)) {
-		await i.reply('The URL provided is not a valid song link, please try with a valid URL.');
-		return;
-	}
-
-	if (!member?.voice.channel) {
-		await i.reply('You must be connected to a voice channel to play a song.');
-		return;
-	}
-
-	playSong(url, member.voice.channel);
-}
