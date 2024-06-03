@@ -12,3 +12,8 @@ export function isValidURL(str: string): boolean {
 	);
 	return pattern.test(str);
 }
+
+export function timeStringToSeconds(timeString: string) {
+	const [minutes, seconds] = timeString.trim().split(':').map(Number);
+	return minutes * 60 + seconds;
+}
