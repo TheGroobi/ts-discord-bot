@@ -71,8 +71,9 @@ async function playSong(url: string, vc: VoiceBasedChannel): Promise<void> {
 		queueIndex++;
 		//remove the song played from the folder/queue
 		if (queueIndex + 1 > fs.readdirSync('src/songs').length) {
-			connection.destroy();
-			return;
+			setTimeout(() => {
+				connection.destroy();
+			}, 5000);
 		} else {
 			playNextSong(player, connection, queueIndex);
 		}
@@ -91,7 +92,6 @@ function playNextSong(player: AudioPlayer, connection: VoiceConnection, queueInd
 		connection.subscribe(player);
 	} catch (e) {
 		console.error(e);
-		connection.destroy();
 	}
 }
 
@@ -99,6 +99,15 @@ function createPlayableSongResource(index: number): AudioResource {
 	return createAudioResource(
 		createReadStream(join(__dirname, `../songs/${fs.readdirSync(songsDir)[index]}`))
 	);
+}
+
+export function pauseSong(player: AudioPlayer, paused: Boolean) {
+	if (!paused) {
+		player.pause(true);
+	} else {
+		player.unpause();
+	}
+	return (paused = !paused);
 }
 
 export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
