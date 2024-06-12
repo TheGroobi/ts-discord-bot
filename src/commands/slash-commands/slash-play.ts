@@ -16,6 +16,7 @@ export default {
 			await i.reply('You must provide a URL to play a song!');
 			return;
 		}
+
 		playCommand(url, i);
 	},
 } satisfies Command['default'];

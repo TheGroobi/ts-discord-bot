@@ -5,22 +5,21 @@ import {
 	AudioPlayer,
 	AudioPlayerStatus,
 	AudioResource,
-	NoSubscriberBehavior,
 	VoiceConnection,
-	createAudioPlayer,
 	createAudioResource,
 	getVoiceConnection,
 	joinVoiceChannel,
 } from '@discordjs/voice';
 import { isValidURL } from '../utils/helper';
 import { join } from 'node:path';
+import { player } from '../bot';
 
 const yt_dlp = new YTDlpWrap();
 const songsDir = 'src/songs';
 const songCount = fs.readdirSync(songsDir).length + 1;
 const outputFile = `src/songs/song_${songCount}.ogg`;
 
-async function downloadSong(url: string): Promise<void> {
+async function downloadSong(url: string): Promise<string> {
 	console.log('Downloading the song...');
 
 	// prettier-ignore
@@ -37,7 +36,7 @@ async function downloadSong(url: string): Promise<void> {
 
 		try {
 			console.log('Downloading audio...');
-			yt_dlp.exec(flags).on('close', () => resolve())
+			yt_dlp.exec(flags).on('close', () => resolve('Downloaded the song correctly!'))
 		} catch (err) {
 			console.error('Error downloading the song: ', err);
 			reject(err);
@@ -45,24 +44,30 @@ async function downloadSong(url: string): Promise<void> {
 	});
 }
 
-function connectToVC(vc: VoiceBasedChannel): void {
+function connectToVC(vc: VoiceBasedChannel): string {
 	joinVoiceChannel({
 		channelId: vc.id,
 		guildId: vc.guild.id,
 		adapterCreator: vc.guild.voiceAdapterCreator,
 	});
+
+	return 'Connecting to voice channel...';
 }
 
-async function playSong(url: string, vc: VoiceBasedChannel): Promise<void> {
-	await downloadSong(url);
+async function playSong(
+	url: string,
+	vc: VoiceBasedChannel,
+	i: CommandInteraction | Message
+): Promise<void> {
+	let msg = await downloadSong(url);
+
+	if (i instanceof CommandInteraction) {
+		await i.reply(msg);
+	}
+
 	connectToVC(vc);
 
 	const connection = getVoiceConnection(vc.guild.id)!;
-	const player = createAudioPlayer({
-		behaviors: {
-			noSubscriber: NoSubscriberBehavior.Pause,
-		},
-	});
 
 	let queueIndex: number = 0;
 	playNextSong(player, connection, queueIndex);
@@ -101,13 +106,19 @@ function createPlayableSongResource(index: number): AudioResource {
 	);
 }
 
-export function pauseSong(player: AudioPlayer, paused: Boolean) {
-	if (!paused) {
+export async function pauseSong(player: AudioPlayer, i: CommandInteraction | Message) {
+	if (player.state.status !== 'paused') {
 		player.pause(true);
+		await i.reply('Pausing the song');
 	} else {
-		player.unpause();
+		try {
+			player.unpause();
+			await i.reply('Unpausing the song');
+		} catch {
+			await i.reply('There was a problem pausing the song, try again');
+			return;
+		}
 	}
-	return (paused = !paused);
 }
 
 export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
@@ -123,5 +134,18 @@ export async function playCommand(url: string, i: Message | CommandInteraction):
 		return;
 	}
 
-	playSong(url, member.voice.channel);
+	playSong(url, member.voice.channel, i);
+}
+
+export async function stopCommand(player: AudioPlayer, i: Message | CommandInteraction) {
+	if (player.state.status === 'idle') {
+		i.reply('Nothing is currently playing');
+		return;
+	}
+
+	if (player.stop()) {
+		await i.reply('Stopped the current playing song');
+	} else {
+		await i.reply('Something went wrong stopping the song, please try again...');
+	}
 }

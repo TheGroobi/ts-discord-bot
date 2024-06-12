@@ -13,6 +13,6 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "start": "ts-node src/Bot.ts"
+    "start": "ts-node src/bot.ts"
   }
 }
