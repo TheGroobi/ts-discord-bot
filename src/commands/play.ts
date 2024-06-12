@@ -7,27 +7,26 @@ import {
 	AudioResource,
 	VoiceConnection,
 	createAudioResource,
-	getVoiceConnection,
 	joinVoiceChannel,
 } from '@discordjs/voice';
-import { isValidURL } from '../utils/helper';
+import { isValidURL, removeAllSongs, removeLastPlayedSong } from '../utils/helper';
 import { join } from 'node:path';
 import { player } from '../bot';
 
 const yt_dlp = new YTDlpWrap();
 const songsDir = 'src/songs';
-const songCount = fs.readdirSync(songsDir).length + 1;
-const outputFile = `src/songs/song_${songCount}.ogg`;
 
-async function downloadSong(url: string): Promise<string> {
-	console.log('Downloading the song...');
-
+async function downloadSong(url: string): Promise<void> {
+	let songCount =
+		fs.readdirSync(songsDir).at(-1) !== undefined
+			? Number(fs.readdirSync(songsDir).at(-1)?.split('.ogg')[0]) + 1
+			: 1;
 	// prettier-ignore
 	return new Promise(async (resolve, reject) => {
 		const flags = [
 			url,
 			'-f', 'bestaudio/best',
-			'-o', outputFile,
+			'-o', `src/songs/${songCount}.ogg`,
 			'--max-filesize', '10M',
 			'--no-playlist',
 			'--ffmpeg-location', 'C:/ffmpeg/bin',
@@ -36,7 +35,7 @@ async function downloadSong(url: string): Promise<string> {
 
 		try {
 			console.log('Downloading audio...');
-			yt_dlp.exec(flags).on('close', () => resolve('Downloaded the song correctly!'))
+			yt_dlp.exec(flags).on('close', () => resolve()).on('ytDlpEvent', (eT, eD) => console.log(eT, eD))
 		} catch (err) {
 			console.error('Error downloading the song: ', err);
 			reject(err);
@@ -44,14 +43,14 @@ async function downloadSong(url: string): Promise<string> {
 	});
 }
 
-function connectToVC(vc: VoiceBasedChannel): string {
-	joinVoiceChannel({
+function connectToVC(vc: VoiceBasedChannel): VoiceConnection {
+	return joinVoiceChannel({
 		channelId: vc.id,
 		guildId: vc.guild.id,
 		adapterCreator: vc.guild.voiceAdapterCreator,
+		selfDeaf: true,
+		selfMute: false,
 	});
-
-	return 'Connecting to voice channel...';
 }
 
 async function playSong(
@@ -59,66 +58,48 @@ async function playSong(
 	vc: VoiceBasedChannel,
 	i: CommandInteraction | Message
 ): Promise<void> {
-	let msg = await downloadSong(url);
-
-	if (i instanceof CommandInteraction) {
-		await i.reply(msg);
+	if (player.state.status === 'playing') {
+		i.reply(`Song added to the queue at position ${fs.readdirSync(songsDir).length}`);
+		await downloadSong(url);
+		return;
 	}
 
-	connectToVC(vc);
+	if (i instanceof CommandInteraction) {
+		await i.reply('Cooking the song up...');
+	}
+	await downloadSong(url);
 
-	const connection = getVoiceConnection(vc.guild.id)!;
-
-	let queueIndex: number = 0;
-	playNextSong(player, connection, queueIndex);
+	const connection = connectToVC(vc);
+	playNextSong(player, connection);
 
 	player.on(AudioPlayerStatus.Idle, () => {
-		queueIndex++;
-		//remove the song played from the folder/queue
-		if (queueIndex + 1 > fs.readdirSync('src/songs').length) {
+		removeLastPlayedSong();
+		if (1 === fs.readdirSync(songsDir).length) {
 			setTimeout(() => {
+				connection.setSpeaking(false);
 				connection.destroy();
-			}, 5000);
+			}, 2500);
 		} else {
-			playNextSong(player, connection, queueIndex);
+			playNextSong(player, connection);
 		}
 	});
 }
 
-function getNextSong(i: number) {
-	return createPlayableSongResource(i);
-}
-
-function playNextSong(player: AudioPlayer, connection: VoiceConnection, queueIndex: number) {
+function playNextSong(p: AudioPlayer, connection: VoiceConnection) {
 	try {
-		let song = getNextSong(queueIndex);
-		console.log('Getting the song with index: ', queueIndex);
-		player.play(song);
-		connection.subscribe(player);
+		let song = createPlayableSongResource();
+		connection.setSpeaking(true);
+		p.play(song);
+		connection.subscribe(p);
 	} catch (e) {
 		console.error(e);
 	}
 }
 
-function createPlayableSongResource(index: number): AudioResource {
+function createPlayableSongResource(): AudioResource {
 	return createAudioResource(
-		createReadStream(join(__dirname, `../songs/${fs.readdirSync(songsDir)[index]}`))
+		createReadStream(join(__dirname, `../songs/${fs.readdirSync(songsDir)[0]}`))
 	);
-}
-
-export async function pauseSong(player: AudioPlayer, i: CommandInteraction | Message) {
-	if (player.state.status !== 'paused') {
-		player.pause(true);
-		await i.reply('Pausing the song');
-	} else {
-		try {
-			player.unpause();
-			await i.reply('Unpausing the song');
-		} catch {
-			await i.reply('There was a problem pausing the song, try again');
-			return;
-		}
-	}
 }
 
 export async function playCommand(url: string, i: Message | CommandInteraction): Promise<void> {
@@ -134,18 +115,41 @@ export async function playCommand(url: string, i: Message | CommandInteraction):
 		return;
 	}
 
+	if (fs.readdirSync(songsDir).length === 10) {
+		await i.reply('Max queue size is 10!');
+		return;
+	}
+
 	playSong(url, member.voice.channel, i);
 }
 
-export async function stopCommand(player: AudioPlayer, i: Message | CommandInteraction) {
-	if (player.state.status === 'idle') {
+export async function stopCommand(p: AudioPlayer, i: Message | CommandInteraction) {
+	if (p.state.status === 'idle') {
 		i.reply('Nothing is currently playing');
 		return;
 	}
 
-	if (player.stop()) {
-		await i.reply('Stopped the current playing song');
+	if (p.stop()) {
+		await i.reply('Stopped the bot');
+		
+	}
+
+	removeAllSongs();
+
+	await i.reply('Something went wrong stopping the song, please try again...');
+}
+
+export async function pauseCommand(p: AudioPlayer, i: CommandInteraction | Message) {
+	if (p.state.status !== 'paused') {
+		p.pause(true);
+		await i.reply('Pausing the song');
 	} else {
-		await i.reply('Something went wrong stopping the song, please try again...');
+		try {
+			p.unpause();
+			await i.reply('Unpausing the song');
+		} catch {
+			await i.reply('There was a problem pausing the song, try again');
+			return;
+		}
 	}
 }
