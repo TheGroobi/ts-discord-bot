@@ -5,8 +5,8 @@ import { player } from '../../bot';
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('stop')
-		.setDescription('Stops the current song completely'),
+		.setName('quit')
+		.setDescription('Removes all queue and stops the bot, disconnecting it from the channel'),
 	async execute(i) {
 		quitCommand(player, i);
 	},

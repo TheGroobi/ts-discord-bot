@@ -129,14 +129,13 @@ export async function quitCommand(p: AudioPlayer, i: Message | CommandInteractio
 		return;
 	}
 
-	if (p.stop()) {
-		await i.reply('Stopped the bot');
-		
-	}
-
 	removeAllSongs();
 
-	await i.reply('Something went wrong stopping the song, please try again...');
+	if (p.stop()) {
+		await i.reply('Stopped the bot');
+	} else {
+		await i.reply('Something went wrong stopping the song, please try again...');
+	}
 }
 
 export async function pauseCommand(p: AudioPlayer, i: CommandInteraction | Message) {
