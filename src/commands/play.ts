@@ -123,7 +123,7 @@ export async function playCommand(url: string, i: Message | CommandInteraction):
 	playSong(url, member.voice.channel, i);
 }
 
-export async function stopCommand(p: AudioPlayer, i: Message | CommandInteraction) {
+export async function quitCommand(p: AudioPlayer, i: Message | CommandInteraction) {
 	if (p.state.status === 'idle') {
 		i.reply('Nothing is currently playing');
 		return;

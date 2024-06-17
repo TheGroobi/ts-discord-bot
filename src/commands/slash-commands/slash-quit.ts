@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { stopCommand } from '../play';
+import { quitCommand } from '../play';
 import { Command } from 'src/types';
 import { player } from '../../bot';
 
@@ -8,6 +8,6 @@ export default {
 		.setName('stop')
 		.setDescription('Stops the current song completely'),
 	async execute(i) {
-		stopCommand(player, i);
+		quitCommand(player, i);
 	},
 } satisfies Command['default'];
