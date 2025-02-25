@@ -1,10 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {
-	REST,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	Routes,
-} from 'discord.js';
+import { REST, RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from 'discord.js';
 import { Client, Collection } from 'discord.js';
 import { Command } from 'src/types';
 import { config } from 'dotenv';
@@ -60,3 +56,4 @@ export const deploySlashCommands = async (): Promise<void> => {
 		console.error(e);
 	}
 };
+
