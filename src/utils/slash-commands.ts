@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { REST, RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from 'discord.js';
-import { Client, Collection } from 'discord.js';
+import { Collection } from 'discord.js';
 import { Command } from 'src/types';
+import type { ClientWithCommands } from '../types';
 import { config } from 'dotenv';
 import { loadModule } from './helper';
 
@@ -12,7 +13,7 @@ const clientId = process.env.DISCORD_CLIENT_ID;
 const publicKey = process.env.DISCORD_PUBLIC_KEY;
 let commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 
-export const readySlashCommands = (c: Client): boolean | void => {
+export const readySlashCommands = (c: ClientWithCommands): boolean | void => {
 	c.commands = new Collection();
 	const foldersPath = path.join(__dirname, '../commands/slash-commands');
 	const commandFiles = fs.readdirSync(foldersPath);
@@ -56,4 +57,3 @@ export const deploySlashCommands = async (): Promise<void> => {
 		console.error(e);
 	}
 };
-

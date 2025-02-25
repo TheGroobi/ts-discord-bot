@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import { Client, GatewayIntentBits, Events, Interaction, Message } from 'discord.js';
+import type { ClientWithCommands } from './types';
 import ready from './utils/ready';
 import { handleMessageCommand } from './utils/handlers/message-handler';
 import { handleSlashCommand } from './utils/handlers/handle-slash-command';
@@ -24,7 +25,7 @@ const client = new Client({
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildVoiceStates,
 	],
-});
+}) as ClientWithCommands;
 
 ready(client, true);
 
@@ -45,3 +46,4 @@ client.on(Events.MessageCreate, (message: Message) => {
 
 	handleMessageCommand(message);
 });
+

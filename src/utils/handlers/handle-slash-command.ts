@@ -1,7 +1,8 @@
 import { CommandInteraction } from 'discord.js';
+import { CommandInteractionWithClientCommands } from 'src/types';
 
-export async function handleSlashCommand(i: CommandInteraction) {
-	const command = i.client.commands.get(i.commandName);
+export async function handleSlashCommand(i: CommandInteractionWithClientCommands) {
+	const command = i.client.commands?.get(i.commandName);
 
 	if (!command) {
 		console.error(`No command matching ${i.commandName} was found.`);
@@ -9,7 +10,7 @@ export async function handleSlashCommand(i: CommandInteraction) {
 	}
 
 	try {
-		await command.execute(i);
+		await command.execute(i as CommandInteraction);
 	} catch (e: unknown) {
 		console.error(e);
 		if (i.replied || i.deferred) {

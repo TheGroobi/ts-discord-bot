@@ -5,6 +5,7 @@ import {
 	AudioPlayer,
 	AudioPlayerStatus,
 	AudioResource,
+	DiscordGatewayAdapterCreator,
 	VoiceConnection,
 	createAudioResource,
 	joinVoiceChannel,
@@ -47,7 +48,7 @@ function connectToVC(vc: VoiceBasedChannel): VoiceConnection {
 	return joinVoiceChannel({
 		channelId: vc.id,
 		guildId: vc.guild.id,
-		adapterCreator: vc.guild.voiceAdapterCreator,
+		adapterCreator: vc.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
 		selfDeaf: true,
 		selfMute: false,
 	});
