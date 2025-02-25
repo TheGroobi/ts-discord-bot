@@ -1,7 +1,8 @@
 # 🎵 TypeScript Discord Bot
 
 > [!CAUTION]
-> The bot currently is not usable due to some dependencies changed, yt-dlp-wrap has been deprecated and errors out. (I'm looking to fix this issue sometime soon).
+> The bot currently is currently barely usable, there still may be some issues with playing the songs, queuing etc. 
+> I haven't looked at this project in a while but there are plans of finishing it someday.
 
 This is a simple Discord bot written in TypeScript that provides basic music playback functionality using `yt-dlp` wrapper written in ts.
 The bot allows users to play, pause, and stop music in a voice channel.
