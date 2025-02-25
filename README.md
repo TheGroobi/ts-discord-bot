@@ -6,13 +6,6 @@
 This is a simple Discord bot written in TypeScript that provides basic music playback functionality using `yt-dlp` wrapper written in ts.
 The bot allows users to play, pause, and stop music in a voice channel.
 
-## Features
-
--   **Ping Command (`/ping`)** → Responds with `"Pong!"`
--   **Play Command (`/play <youtube-link>`)** → Downloads the song, converts it to Opus, and plays it. If a song is already playing, it adds the track to a queue.
--   **Pause Command (`/pause`)** → Pauses the currently playing song.
--   **Quit Command (`/quit`)** → Disconnects the bot from the voice channel.
-
 ## Installation & Setup
 
 ### Prerequisites
