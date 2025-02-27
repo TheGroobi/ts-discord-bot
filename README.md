@@ -7,6 +7,11 @@
 This is a simple Discord bot written in TypeScript that provides basic music playback functionality using `yt-dlp` wrapper written in ts.
 The bot allows users to play, pause, and stop music in a voice channel.
 
+The Bot currently handles:
+- Spotify
+- Youtube
+- SoundCloud
+
 ## Commands
 
 `/ping`
